@@ -1,0 +1,176 @@
+
+
+
+#register service on Eureka server
+
+eureka:
+  instance:
+    prefer-ip-address: true
+
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://localhost:8088/eureka/
+
+
+#   write API Gateway
+#  AFTER Using api Gatway ALL service  should be test on APIservice port
+#  i.e 8080, eg. http://localhost:8080/api/address/getalladdress,      eg,http://localhost:8080/api/employee/getallemployee   ..,etc
+#
+#spring:
+#  cloud:
+#    gateway:
+#      routes:
+#      - id: EMPLOYEE
+#        uri: lb://EMPLOYEESERVICE
+#        predicates:
+#          - Path=/api/employee/**
+#        filters:
+#          - AuthFilter
+#          - name: CircuitBreaker
+#            args:
+#              name: EMPLOYEE-SERVICE
+#              fallbackUri: forward:/EmployeeServiceFallback
+#
+#
+#      - id: ADDRESS
+#        uri: lb://ADDRESS
+#        predicates:
+#          - Path=/api/address/**
+#        filters:
+#          - AuthFilter
+#          - name: CircuitBreaker
+#            args:
+#              name: ADDRESS-SERVICE
+#              fallbackUri: forward:/AddressServiceFallback
+#
+#      - id: AUTH
+#        uri: lb://AUTHMICROSERVICE   # We can use -> localhost:port OR lb is registered name of service on the Eureka server it should be EXACTLY Same as per eureka server.
+#        predicates:
+#          - Path=/user/**            # path - decide user sent(localhost:8083/user/**) -> user route is match to this path
+#        filters:
+#            - AuthFilter
+#
+#
+#
+#resilience4j:
+#  circuitbreaker:
+#    instances:
+#      EMPLOYEE-SERVICE:
+#        registerHealthIndicator: true
+#        eventConsumerBufferSize: 10
+#        slidingWindowSize: 5
+#        minimumNumberOfCalls: 5
+#        failureRateThreshold: 50
+#        waitDurationInOpenState: 6s
+#        automaticTransitionFromOpenToHalfOpenEnabled: true
+#        permittedNumberOfCallsInHalfOpenState: 3
+#        slidingWindowType: COUNT_BASED
+#
+#      ADDRESS-SERVICE:
+#        registerHealthIndicator: true
+#        eventConsumerBufferSize: 10
+#        slidingWindowSize: 5
+#        minimumNumberOfCalls: 5
+#        failureRateThreshold: 50
+#        waitDurationInOpenState: 6s
+#        automaticTransitionFromOpenToHalfOpenEnabled: true
+#        permittedNumberOfCallsInHalfOpenState: 3
+#        slidingWindowType: COUNT_BASED
+#
+#management:
+#  endpoints:
+#    web:
+#      exposure:
+#        include: health,info,metrics,circuitbreakers
+#
+#  endpoint:
+#    health:
+#      show-details: always
+#
+#  health:
+#    circuitbreakers:
+#      enabled: true
+#
+
+
+
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: EMPLOYEE
+          uri: lb://EMPLOYEESERVICE
+          predicates:
+            - Path=/api/employee/**
+          filters:
+            - AuthFilter
+            - name: CircuitBreaker
+              args:
+                name: EMPLOYEE-SERVICE
+                fallbackUri: forward:/EmployeeServiceFallback
+
+        - id: ADDRESS
+          uri: lb://ADDRESS
+          predicates:
+            - Path=/api/address/**
+          filters:
+            - AuthFilter
+            - name: CircuitBreaker
+              args:
+                name: ADDRESS-SERVICE
+                fallbackUri: forward:/AddressServiceFallback
+
+        - id: AUTH
+          uri: lb://AUTHMICROSERVICE
+          predicates:
+            - Path=/user/**
+          filters:
+            - AuthFilter
+
+resilience4j:
+  timelimiter:
+    instances:
+      EMPLOYEE-SERVICE:
+        timeoutDuration: 5s
+
+      ADDRESS-SERVICE:
+        timeoutDuration: 5s
+
+  circuitbreaker:
+    instances:
+      EMPLOYEE-SERVICE:
+        registerHealthIndicator: true
+        eventConsumerBufferSize: 10
+        slidingWindowSize: 5
+        minimumNumberOfCalls: 5
+        failureRateThreshold: 50
+        waitDurationInOpenState: 6s
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        permittedNumberOfCallsInHalfOpenState: 3
+        slidingWindowType: COUNT_BASED
+
+      ADDRESS-SERVICE:
+        registerHealthIndicator: true
+        eventConsumerBufferSize: 10
+        slidingWindowSize: 5
+        minimumNumberOfCalls: 5
+        failureRateThreshold: 50
+        waitDurationInOpenState: 6s
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        permittedNumberOfCallsInHalfOpenState: 3
+        slidingWindowType: COUNT_BASED
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,circuitbreakers
+
+  endpoint:
+    health:
+      show-details: always
+  health:
+    circuitbreakers:
+      enabled: true

@@ -1,0 +1,34 @@
+package com.ApiGatewayService.ApiGateway.exception;
+
+
+import org.springframework.http.HttpStatus;
+
+public class BadRequestException extends RuntimeException {
+    private String message;
+    private HttpStatus httpStatus;
+
+    public BadRequestException(String message){
+//        super(message);
+        this.message = message;
+        this.httpStatus = HttpStatus.BAD_REQUEST;
+    }
+
+
+    public BadRequestException(String message ,HttpStatus httpStatus){
+//        super(message);
+        this.message = message;
+        this.httpStatus = httpStatus;
+    }
+
+
+    //geetrs
+
+
+    public String getMessage(){
+        return message;
+    }
+
+    public HttpStatus getHttpStatus(){
+        return httpStatus;
+    }
+}
