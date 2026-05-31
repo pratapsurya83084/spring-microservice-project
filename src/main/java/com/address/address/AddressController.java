@@ -34,12 +34,17 @@ public class AddressController {
      public ResponseEntity<List<AddressDto>> UpdateAdreess(@RequestParam Long empid , @RequestBody AddressRequest addressDto){
       List<AddressDto> response  = addressServiceimpl.updateAddress(empid, addressDto);
       return new  ResponseEntity<>(response,HttpStatus.OK);
-    } 
+    }
 
+    //employee microservice use this for communication to get address of specific employee
     @GetMapping("/get-singleAddress")
-    public ResponseEntity<List<AddressDto>> GetSingleAddress(@RequestParam Long id){
-      List<AddressDto>  singleAddress = Collections.singletonList(addressServiceimpl.getSingleAddress(id));
-     return new  ResponseEntity<>(singleAddress,HttpStatus.CREATED);
+    public ResponseEntity<List<AddressDto>> getSingleAddress(
+            @RequestParam Long id) {
+
+        List<AddressDto> addresses =
+                addressServiceimpl.getSingleAddress(id);
+
+        return ResponseEntity.ok(addresses);
     }
 
     @GetMapping("/get-addressList")

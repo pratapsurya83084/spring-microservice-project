@@ -1,8 +1,12 @@
 package com.address.address.service.Impl;
 
+import com.address.address.client.EmployeeClient;
+import com.address.address.exception.GlobelExceptionHandler;
+import com.address.address.exception.ResourceNotFoundException;
 import com.address.address.model.dto.AddressDto;
 import com.address.address.model.dto.AddressRequest;
 import com.address.address.model.dto.AddressRequestDto;
+import com.address.address.model.dto.EmployeeDto;
 import com.address.address.model.entity.Address;
 import com.address.address.repository.AddressRepository;
 import com.address.address.service.AddressService;
@@ -21,29 +25,41 @@ public class AddressServiceImpl implements AddressService {
 
     Logger log = LoggerFactory.getLogger(AddressServiceImpl.class);
 
+     //bean creation process
     private final AddressRepository addressRepository;
-
+     private final EmployeeClient employeeClient;
+//     private final GlobelExceptionHandler globelExceptionHandler;
     // Constructor Injection
-    public AddressServiceImpl(AddressRepository addressRepository,ModelMapper modelMapper) {
+    public AddressServiceImpl(AddressRepository addressRepository, ModelMapper modelMapper, EmployeeClient employeeClient) {
         this.addressRepository = addressRepository;
         this.modelMapper = modelMapper;
+        this.employeeClient = employeeClient;
+
     }
 
     ModelMapper modelMapper;
     @Override
     public List<AddressDto> saveAddress(AddressRequest addressRequest) {
 
-        List<Address>  listTosave  =  this.saveOrUpdateAddress(addressRequest);
+        try {
+            employeeClient.GetSingleEmp(addressRequest.getEmpId());
+        } catch (Exception e) {
+            throw new ResourceNotFoundException(
+                    "Employee not found with ID: " + addressRequest.getEmpId()
+            );
+        }
 
-        List<Address> savedAddress = addressRepository.saveAll(listTosave);
+        List<Address> addresses = saveOrUpdateAddress(addressRequest);
 
-        return savedAddress.stream()
+        return addressRepository.saveAll(addresses)
+                .stream()
                 .map(address -> modelMapper.map(address, AddressDto.class))
                 .toList();
     }
 
     @Override
     public List<AddressDto> updateAddress(Long id, AddressRequest addressRequest) {
+        EmployeeDto employee   = employeeClient.GetSingleEmp(addressRequest.getEmpId());
       //find Address by id  if found then update else notfound Exception throw
 
         //if empId not found then craete a new Address else found EmpId then update Address
@@ -92,13 +108,54 @@ public class AddressServiceImpl implements AddressService {
         return listTosave;
     }
 
-    @Override
-    public AddressDto getSingleAddress(Long id) {
-      Address  address =  addressRepository.findById(id).orElseThrow(()-> new RuntimeException("Address is not found with that ID'S"));
-      AddressDto  address1 = modelMapper.map(address,AddressDto.class);
-      return address1;
+    //get SingleAddressByEmpId
+
+    public List<AddressDto> findEmpAllById(Long emp_id){
+
+        List<Address> addressByEmpId =
+                addressRepository.findEmpAllById(emp_id);
+
+        if (addressByEmpId.isEmpty()){
+            throw new ResourceNotFoundException(
+                    "Employee Address Not Found"
+            );
+        }
+
+        return addressByEmpId.stream()
+                .map(address ->
+                        modelMapper.map(address, AddressDto.class))
+                .toList();
     }
 
+
+    //this is not just for idWiseSingleAddress return ,
+    // it is for => getSingleAddresLiST with address for microservice communication this api function
+//    @Override
+//    public AddressDto getSingleAddress(Long id) {
+//        log.info("EmpId isReceived : "+id);
+//      Address  address =  addressRepository.findById(id)
+//              .orElseThrow(()-> new ResourceNotFoundException("Address is not found with that ID'S:"+id));
+//      AddressDto  address1 = modelMapper.map(address,AddressDto.class);
+//      return address1;
+//    }
+    @Override
+    public List<AddressDto> getSingleAddress(Long id) {
+
+        List<Address> addresses =
+                addressRepository.findByEmpId(id);
+
+        if (addresses.isEmpty()) {
+            throw new ResourceNotFoundException(
+                    "Address not found with employee id : " + id);
+        }
+
+        return addresses.stream()
+                .map(address ->
+                        modelMapper.map(address, AddressDto.class))
+                .toList();
+    }
+
+    //get All addressList
     @Override
     public List<AddressDto> getAddress() {
        List<Address> list =  addressRepository.findAll();
@@ -117,5 +174,7 @@ public class AddressServiceImpl implements AddressService {
         addressRepository.deleteById(id);
 
     }
+
+
 
 }

@@ -11,7 +11,7 @@ public interface AddressService {
 
     List<AddressDto> updateAddress(Long id,AddressRequest addressRequest);
 
-    AddressDto getSingleAddress(Long id);
+    List<AddressDto> getSingleAddress(Long empId);
 
     List<AddressDto> getAddress();
 
