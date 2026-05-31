@@ -1,4 +1,31 @@
-package com.employeeService.employeeService.exception;
-
-public class MissingParametersException {
-}
+//package com.employeeService.employeeService.exception;
+//
+//import org.springframework.http.HttpStatus;
+//
+//public class MissingParametersException extends RuntimeException {
+//
+//    private String message;
+//    private String status;
+//
+//    public MissingParametersException(String message,String status){
+//        this.message = message;
+//        this.status = status;
+//    }
+//
+//    @Override
+//    public String getMessage() {
+//        return message;
+//    }
+//
+//    public void setMessage(String message) {
+//        this.message = message;
+//    }
+//
+//    public String  getStatus() {
+//        return status;
+//    }
+//
+//    public void setStatus(String status) {
+//        this.status = status;
+//    }
+//}
